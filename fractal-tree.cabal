@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     FractalTree
   build-depends:       base >= 4.7 && < 5
+                     , QuickCheck >= 2.9
   default-language:    Haskell2010
 
 executable fractal-tree-exe
