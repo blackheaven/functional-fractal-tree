@@ -2,7 +2,10 @@ module FractalTree
     ( drawTree
     ) where
 
--- | My function description
+data Pixel = Space | One
+newtype Row = Row [Pixel]
+
+-- | generate the lines to be displayed
 -- 
 -- >>> drawTree 0 0
 -- []
