@@ -11,4 +11,4 @@ main = do
     else do
       let [cols, rows] = args
       putStrLn $ "# asked for a " ++ cols ++ " columns and " ++ rows ++ " rows fractal tree"
-      putStrLn $ unlines $ drawTree (read cols) (read rows)
+      putStrLn $ unlines $ renderTree (read cols) (read rows)

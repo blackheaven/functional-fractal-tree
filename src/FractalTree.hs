@@ -1,5 +1,5 @@
 module FractalTree
-    ( drawTree
+    ( renderTree
     ) where
 
 import Test.QuickCheck
@@ -32,6 +32,7 @@ render (Row xs) = map convert xs
 -- prop> x >= 2 ==> map head (group (splitSpace x (`replicate` 'T') (`replicate` 'B'))) == ['T', 'B']
 -- prop> x >= 2 ==> let [a,b] = map length (group (splitSpace x (`replicate` 'T') (`replicate` 'B'))) in elem (b-a) [0,1]
 splitSpace :: Monoid a => Int -> (Int -> a) -> (Int -> a) -> a
+splitSpace 0 _ _ = mempty
 splitSpace s t b = t (div s 2) <> b (div (s+1) 2)
 
 -- |
@@ -69,7 +70,7 @@ drawLeftObliquePartOfY b r = [ mkRowWithOneAtPosition b x | x <- [(b-r)..(b-1)],
 -- prop> x > 1 && y > 0 && x >= y ==>  (\xs -> and (zipWith (\a b -> a == b + 2) xs (tail xs))) (map (length . dropWhile (/= One) . reverse . dropWhile (/= One) . unRow) (drawObliquePartsOfY ((x*2) + 1) y))
 -- prop> x > 1 && y > 0 && x >= y ==>  all (>= 3) (map (length . dropWhile (/= One) . reverse . dropWhile (/= One) . unRow) (drawObliquePartsOfY ((x*2) + 1) y))
 drawObliquePartsOfY :: Int -> Int -> [Row]
-drawObliquePartsOfY b r = zipWith3 (\l m r -> Row (l <> m <> r)) left (repeat [Space]) (map reverse left)
+drawObliquePartsOfY b r = zipWith (\l r -> Row (take b (l <> [Space] <> r))) left (map reverse left)
   where left = map unRow (drawLeftObliquePartOfY (div b 2) r)
 
 -- |
@@ -79,9 +80,18 @@ drawObliquePartsOfY b r = zipWith3 (\l m r -> Row (l <> m <> r)) left (repeat [S
 drawY :: Int -> Int -> [Row]
 drawY c r = splitSpace r (drawObliquePartsOfY c) (drawVerticalPartOfY c)
 
+-- |
+-- 
+-- prop> y > 1 ==> length (drawTree ((2 * y) + 1) y) == y
+-- prop> x > 1 && y > 0 && x >= y ==> all (\r -> length r == ((x*2) + 1)) (map unRow (drawTree ((x*2) + 1) y))
+drawTree :: Int -> Int -> [Row]
+drawTree c r = splitSpace r (\h -> map Row (zipWith (<>) (left h) (right h))) (drawY c)
+  where left h = map unRow (drawTree (div c 2) h)
+        right h = map unRow (drawTree (div c 2 + mod c 2) h)
+
 -- | generate the lines to be displayed
 -- 
--- >>> drawTree 0 0
+-- >>> renderTree 0 0
 -- []
-drawTree :: Int -> Int -> [String]
-drawTree _ _ = map render []
+renderTree :: Int -> Int -> [String]
+renderTree c r = map render (drawTree c r)
