@@ -53,10 +53,24 @@ mkRowWithOneAtPosition c p = Row $ replicate p Space <> [One] <> replicate (c - 
 -- |
 -- 
 -- prop> x > 0 && y > 0 && x >= y ==> length (drawLeftObliquePartOfY x y) == y
+-- prop> x > 1 && y > 0 && x >= y ==> all (\r -> length r == x) (map unRow (drawLeftObliquePartOfY x y))
 -- prop> x > 0 && y > 0 && x >= y ==> all (\r -> length (filter (== One) r) == 1) (map unRow (drawLeftObliquePartOfY x y))
 -- prop> x > 0 && y > 0 && x >= y ==>  (\xs -> and (zipWith (\a b -> a == b - 1) xs (tail xs))) (map (length . takeWhile (/= One) . unRow) (drawLeftObliquePartOfY x y))
 drawLeftObliquePartOfY :: Int -> Int -> [Row]
 drawLeftObliquePartOfY b r = [ mkRowWithOneAtPosition b x | x <- [(b-r)..(b-1)], x >= 0 ]
+
+-- |
+-- 
+-- prop> y > 1 ==> length (drawObliquePartsOfY ((2 * y) + 1) y) == y
+-- prop> x > 1 && y > 0 && x >= y ==> all (\r -> length r == ((x*2) + 1)) (map unRow (drawObliquePartsOfY ((x*2) + 1) y))
+-- prop> x > 1 && y > 0 && x >= y ==> all (\r -> length (filter (== One) r) == 2) (map unRow (drawObliquePartsOfY ((x*2) + 1) y))
+-- prop> x > 1 && y > 0 && x >= y ==>  (\xs -> and (zipWith (\a b -> a == b - 1) xs (tail xs))) (map (length . takeWhile (/= One) . unRow) (drawObliquePartsOfY ((x*2) + 1) y))
+-- prop> x > 1 && y > 0 && x >= y ==>  (\xs -> and (zipWith (\a b -> a == b - 1) xs (tail xs))) (map (length . takeWhile (/= One) . reverse . unRow) (drawObliquePartsOfY ((x*2) + 1) y))
+-- prop> x > 1 && y > 0 && x >= y ==>  (\xs -> and (zipWith (\a b -> a == b + 2) xs (tail xs))) (map (length . dropWhile (/= One) . reverse . dropWhile (/= One) . unRow) (drawObliquePartsOfY ((x*2) + 1) y))
+-- prop> x > 1 && y > 0 && x >= y ==>  all (>= 3) (map (length . dropWhile (/= One) . reverse . dropWhile (/= One) . unRow) (drawObliquePartsOfY ((x*2) + 1) y))
+drawObliquePartsOfY :: Int -> Int -> [Row]
+drawObliquePartsOfY b r = zipWith3 (\l m r -> Row (l <> m <> r)) left (repeat [Space]) (map reverse left)
+  where left = map unRow (drawLeftObliquePartOfY (div b 2) r)
 
 -- | generate the lines to be displayed
 -- 
