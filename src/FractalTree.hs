@@ -10,7 +10,7 @@ data Pixel = Space | One deriving (Eq, Show)
 instance Arbitrary Pixel where
     arbitrary = elements [Space, One]
 
-newtype Row = Row [Pixel]
+newtype Row = Row { unRow :: [Pixel] }
 
 -- |
 -- 
@@ -33,6 +33,14 @@ render (Row xs) = map convert xs
 -- prop> x >= 2 ==> let [a,b] = map length (group (splitSpace x (`replicate` 'T') (`replicate` 'B'))) in elem (b-a) [0,1]
 splitSpace :: Monoid a => Int -> (Int -> a) -> (Int -> a) -> a
 splitSpace s t b = t (div s 2) <> b (div (s+1) 2)
+
+-- |
+-- 
+-- prop> x > 0 && y > 0 ==> length (drawVerticalPartOfY x y) == y
+-- prop> x > 0 && y > 0 ==> all (\r -> length r == x) (map unRow (drawVerticalPartOfY x y))
+-- prop> x > 2 && y > 0 ==> all (\r -> let [a, b, c] = map length (group r) in b == 1 && elem (a-c) [0,1]) (map unRow (drawVerticalPartOfY x y))
+drawVerticalPartOfY :: Int -> Int -> [Row]
+drawVerticalPartOfY c r = replicate r $ Row $ replicate (div c 2) Space <> [One] <> replicate ((div (c+1) 2) - 1) Space
 
 -- | generate the lines to be displayed
 -- 
