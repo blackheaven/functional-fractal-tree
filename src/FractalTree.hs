@@ -38,9 +38,25 @@ splitSpace s t b = t (div s 2) <> b (div (s+1) 2)
 -- 
 -- prop> x > 0 && y > 0 ==> length (drawVerticalPartOfY x y) == y
 -- prop> x > 0 && y > 0 ==> all (\r -> length r == x) (map unRow (drawVerticalPartOfY x y))
--- prop> x > 2 && y > 0 ==> all (\r -> let [a, b, c] = map length (group r) in b == 1 && elem (a-c) [0,1]) (map unRow (drawVerticalPartOfY x y))
+-- prop> x > 2 && y > 0 && x > y ==> all (\r -> let [a, b, c] = map length (group r) in b == 1 && elem (a-c) [0,1]) (map unRow (drawVerticalPartOfY x y))
 drawVerticalPartOfY :: Int -> Int -> [Row]
-drawVerticalPartOfY c r = replicate r $ Row $ replicate (div c 2) Space <> [One] <> replicate ((div (c+1) 2) - 1) Space
+drawVerticalPartOfY c r = replicate r $ mkRowWithOneAtPosition c (div c 2)
+
+-- |
+-- 
+-- prop> x > 0 && y >= 0 && x > y ==> length (unRow (mkRowWithOneAtPosition x y)) == x
+-- prop> x > 0 && y >= 0 && x > y ==> length (filter (== One) (unRow (mkRowWithOneAtPosition x y))) == 1
+-- prop> x > 0 && y >= 0 && x > y ==> let [a, b, c] = map length (group ([Space] ++ unRow (mkRowWithOneAtPosition x y) ++ [Space])) in b == 1 && a == y + 1
+mkRowWithOneAtPosition :: Int -> Int -> Row
+mkRowWithOneAtPosition c p = Row $ replicate p Space <> [One] <> replicate (c - p - 1) Space
+
+-- |
+-- 
+-- prop> x > 0 && y > 0 && x >= y ==> length (drawLeftObliquePartOfY x y) == y
+-- prop> x > 0 && y > 0 && x >= y ==> all (\r -> length (filter (== One) r) == 1) (map unRow (drawLeftObliquePartOfY x y))
+-- prop> x > 0 && y > 0 && x >= y ==>  (\xs -> and (zipWith (\a b -> a == b - 1) xs (tail xs))) (map (length . takeWhile (/= One) . unRow) (drawLeftObliquePartOfY x y))
+drawLeftObliquePartOfY :: Int -> Int -> [Row]
+drawLeftObliquePartOfY b r = [ mkRowWithOneAtPosition b x | x <- [(b-r)..(b-1)], x >= 0 ]
 
 -- | generate the lines to be displayed
 -- 
