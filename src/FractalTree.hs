@@ -72,6 +72,13 @@ drawObliquePartsOfY :: Int -> Int -> [Row]
 drawObliquePartsOfY b r = zipWith3 (\l m r -> Row (l <> m <> r)) left (repeat [Space]) (map reverse left)
   where left = map unRow (drawLeftObliquePartOfY (div b 2) r)
 
+-- |
+-- 
+-- prop> y > 1 ==> length (drawY ((2 * y) + 1) y) == y
+-- prop> x > 1 && y > 0 && x >= y ==> all (\r -> length r == ((x*2) + 1)) (map unRow (drawY ((x*2) + 1) y))
+drawY :: Int -> Int -> [Row]
+drawY c r = splitSpace r (drawObliquePartsOfY c) (drawVerticalPartOfY c)
+
 -- | generate the lines to be displayed
 -- 
 -- >>> drawTree 0 0
